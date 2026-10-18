@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chemical labels (GHS) — muse-print</title>
+<style>
+:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--accent:#f0a500;
+--card:#161b22;--border:#30363d;--code:#1c2128}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+line-height:1.65}
+header{padding:52px 20px 36px;text-align:center;border-bottom:1px solid var(--border)}
+header h1{font-size:2.6em;letter-spacing:1px}
+header h1 .dot{color:var(--accent)}
+header p{color:var(--muted);max-width:640px;margin:10px auto 0;font-size:1.1em}
+nav{position:sticky;top:0;background:rgba(13,17,23,.96);
+border-bottom:1px solid var(--border);padding:10px 16px;text-align:center;z-index:10}
+nav a{color:var(--muted);text-decoration:none;margin:0 12px;font-size:.93em}
+nav a:hover,nav a.active{color:var(--accent)}
+nav a.active{font-weight:600}
+main{max-width:860px;margin:0 auto;padding:40px 22px 60px}
+main h1{font-size:2em;margin-bottom:18px}
+main h2{font-size:1.45em;margin:34px 0 12px;
+border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:4px}
+main h3{font-size:1.15em;margin:24px 0 8px;color:var(--accent)}
+main p{margin:12px 0}
+main ul,main ol{margin:12px 0 12px 28px}
+main li{margin:5px 0}
+main blockquote{border-left:4px solid var(--accent);background:var(--card);
+padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;color:var(--fg)}
+main blockquote p{margin:6px 0}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-size:.88em;
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;
+padding:16px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:.85em}
+main a{color:var(--accent)}
+main img{max-width:100%;border:1px solid var(--border);border-radius:10px;
+margin:18px 0 6px;display:block}
+main em.caption,figcaption{color:var(--muted);font-size:.9em;display:block;
+margin:0 0 18px}
+table{border-collapse:collapse;margin:16px 0;width:100%;font-size:.93em}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card)}
+dl{margin:14px 0}
+dt{font-weight:600;margin-top:10px}
+dt code{font-size:.85em}
+dd{margin:2px 0 8px 18px;color:var(--fg)}
+hr{border:none;border-top:1px solid var(--border);margin:30px 0}
+footer{text-align:center;padding:36px 20px;color:var(--muted);
+border-top:1px solid var(--border);font-size:.88em}
+.kicker{color:var(--accent);font-style:italic;margin-bottom:20px;display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>muse<span class="dot">-</span>print</h1>
+<p>Drift-free Dymo label printing from a Raspberry Pi.</p>
+</header>
+<nav><a href="index.html" data-page="index">Home</a><a href="quickstart.html" data-page="quickstart">Quickstart</a><a href="the-journey.html" data-page="the-journey">The Journey</a><a href="drivers.html" data-page="drivers">Drivers</a><a href="esc-e.html" data-page="esc-e">ESC E</a><a href="camera.html" data-page="camera">Camera Loop</a><a href="chemical-labels.html" data-page="chemical-labels" class="active">Chemical Labels</a><a href="api.html" data-page="api">API</a></nav>
+<main>
+<h1>Chemical labels (GHS)</h1>
+<p>muse-print can print <strong>GHS-compliant chemical labels</strong> on Dymo label stock<br>that comes pre-printed with a grid of red hazard-diamond outlines. You supply<br>the chemical name, owner, and which hazards apply; the printer fills each<br>diamond with the correct pictogram — or blacks it out solid when that hazard<br>does not apply.</p>
+<h2>The label stock</h2>
+<p>The stock is a wide Dymo-compatible label (2¼″) with **nine red GHS diamond<br>outlines** pre-printed on the right side. The nine diamonds are arranged as a<br>larger diamond — 1-2-3-2-1 rows — not a square 3×3 grid:</p>
+<pre><code>          ◆            row 0: 1 diamond (top)
+        ◆   ◆          row 1: 2 diamonds
+      ◆   ◆   ◆        row 2: 3 diamonds (widest)
+        ◆   ◆          row 3: 2 diamonds
+          ◆            row 4: 1 diamond (bottom)</code></pre>
+<p>The white area on the left carries the chemical name, owner name, telephone<br>number, and expiration date.</p>
+<h2>The nine pictograms</h2>
+<p>The symbols are the official GHS pictograms, sourced as SVG from Wikimedia<br>Commons (<code>File:GHS-pictogram-&lt;name&gt;.svg</code>) — public domain, traced from the<br>official UNECE artwork. The module strips the red/white border layers from<br>each SVG and rasterizes just the black symbol.</p>
+<table><thead><tr><th>Key</th><th>GHS</th><th>Pictogram</th></tr></thead><tbody><tr><td><code>explos</code></td><td>GHS01</td><td>Exploding bomb</td></tr><tr><td><code>flamme</code></td><td>GHS02</td><td>Flame</td></tr><tr><td><code>rondflam</code></td><td>GHS03</td><td>Flame over circle (oxidizer)</td></tr><tr><td><code>bottle</code></td><td>GHS04</td><td>Gas cylinder</td></tr><tr><td><code>acid</code></td><td>GHS05</td><td>Corrosion</td></tr><tr><td><code>skull</code></td><td>GHS06</td><td>Skull and crossbones</td></tr><tr><td><code>exclam</code></td><td>GHS07</td><td>Exclamation mark</td></tr><tr><td><code>silhouette</code></td><td>GHS08</td><td>Health hazard (torso)</td></tr><tr><td><code>pollu</code></td><td>GHS09</td><td>Environment (dead tree/fish)</td></tr></tbody></table>
+<p>They sit in the <strong>standard GHS positions</strong> within the diamond arrangement:</p>
+<ul><li>Top: <code>acid</code> (corrosion)</li><li>Row 1: <code>silhouette</code> (left), <code>bottle</code> (right)</li><li>Row 2: <code>pollu</code> (left), <code>explos</code> (center), <code>skull</code> (right)</li><li>Row 3: <code>flamme</code> (left), <code>exclam</code> (right)</li><li>Bottom: <code>rondflam</code> (oxidizer)</li></ul>
+<h2>Blackout rule</h2>
+<p>A diamond left empty is ambiguous — did the printer miss it, or does the<br>hazard not apply? The convention implemented here: **every diamond that does<br>not carry a pictogram is filled solid black**. A fully blacked-out grid means<br>&quot;no GHS hazards apply.&quot; This matches the reference GHS label layouts, where<br>non-applicable diamonds are obscured rather than left blank.</p>
+<h2>Geometry</h2>
+<p>The registration was dialed in over a print–photograph–adjust loop against<br>the physical label stock (see <a href="camera.html">The camera loop</a>). Final values,<br>for a 1000×350 px image printed through the standard ESC E pipeline:</p>
+<ul><li>Image height <code>H = 350</code> (taller than the 280 px text labels, to reach the</li></ul>
+<p>top of the physical label)</p>
+<ul><li>Center X <code>CX = 805</code></li><li>Row Y positions <code>[48, 100, 152, 204, 256]</code> (52 px vertical spacing)</li><li>Horizontal offsets: ±48 px for the 2-diamond rows, ±96 px for the</li></ul>
+<p>3-diamond row</p>
+<ul><li>Pictogram size 85 px, blackout diamond size 65 px</li></ul>
+<p>Because the Dymo&#x27;s coordinate mapping needed empirical discovery (see<br><a href="the-journey.html">The Journey</a>), treat these numbers as calibrated constants<br>for this specific label stock, not as derivable values.</p>
+<h2>Example: Sodium Lauryl Sulfate</h2>
+<p>Sodium lauryl sulfate (CAS 151-21-3) is classified <strong>GHS02 + GHS05 + GHS07</strong><br>with signal word <strong>DANGER</strong> (H228 flammable solid, H302+H332 harmful if<br>swallowed/inhaled, H315 skin irritation, H318 serious eye damage, H335<br>respiratory irritation, H412 harmful to aquatic life). The printed label<br>shows:</p>
+<ul><li>Product name, signal word <strong>DANGER</strong>, owner, telephone, expiration date</li><li>Flame, corrosion, and exclamation pictograms in their standard diamond</li></ul>
+<p>positions</p>
+<ul><li>The remaining six diamonds blacked out solid</li><li>Hazard statement codes (H228, H302+H332, H315, H318, H335, H412)</li><li>A <strong>QR code</strong> linking to the compound&#x27;s PubChem page, placed in the</li></ul>
+<p>white space below the text</p>
+<h2>The module</h2>
+<p><code>examples/ghs-samples/ghs_symbols.py</code> provides:</p>
+<ul><li><code>ghs_symbol_1bit(key, size)</code> — rasterize one pictogram to a 1-bit PIL image</li><li><code>GRID</code> constants and a <code>draw_diamond</code> helper for the 1-2-3-2-1 layout</li><li><code>blackout_grid(img)</code> — fill all nine diamonds (the no-hazard case)</li></ul>
+<p>The folder also carries all nine SVGs, pre-rendered 1-bit PNGs, a contact<br>sheet, and the full series of calibration test scripts (<code>test_chem*.py</code>)<br>plus the finished label scripts (<code>label_sls.py</code>, <code>label_sls_qr.py</code>).</p>
+<h2>Try it</h2>
+<pre><code># From the repo:
+python examples/ghs-samples/label_sls_qr.py</code></pre>
+<p>Adapt <code>label_sls_qr.py</code>: change the <code>show</code> dict to map your chemical&#x27;s<br>applicable <code>(row, pos)</code> positions to pictogram keys, update the text fields,<br>and print. Everything else — geometry, blackouts, the ESC E pipeline — stays<br>the same.</p>
+</main>
+<footer>
+muse-print &middot; <a href="https://github.com/marcocaggioni/muse-print">GitHub</a>
+&middot; MIT
+</footer>
+</body>
+</html>
