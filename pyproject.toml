@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "muse-print"
+version = "0.1.0"
+description = "Print Dymo LabelWriter labels from a Raspberry Pi — with sensor-accurate label registration"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Marco Caggioni" }]
+keywords = ["dymo", "labelwriter", "label", "printer", "raspberry-pi"]
+dependencies = [
+    "dymoprint>=2.5.0",
+    "Pillow>=9.0",
+    "pyusb>=1.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/marcocaggioni/muse-print"
+Documentation = "https://marcocaggioni.github.io/muse-print/"
+Repository = "https://github.com/marcocaggioni/muse-print"
+
+[project.scripts]
+muse-print = "muse_print.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
