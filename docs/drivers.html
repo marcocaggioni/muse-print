@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drivers — muse-print</title>
+<style>
+:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--accent:#f0a500;
+--card:#161b22;--border:#30363d;--code:#1c2128}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+line-height:1.65}
+header{padding:52px 20px 36px;text-align:center;border-bottom:1px solid var(--border)}
+header h1{font-size:2.6em;letter-spacing:1px}
+header h1 .dot{color:var(--accent)}
+header p{color:var(--muted);max-width:640px;margin:10px auto 0;font-size:1.1em}
+nav{position:sticky;top:0;background:rgba(13,17,23,.96);
+border-bottom:1px solid var(--border);padding:10px 16px;text-align:center;z-index:10}
+nav a{color:var(--muted);text-decoration:none;margin:0 12px;font-size:.93em}
+nav a:hover,nav a.active{color:var(--accent)}
+nav a.active{font-weight:600}
+main{max-width:860px;margin:0 auto;padding:40px 22px 60px}
+main h1{font-size:2em;margin-bottom:18px}
+main h2{font-size:1.45em;margin:34px 0 12px;
+border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:4px}
+main h3{font-size:1.15em;margin:24px 0 8px;color:var(--accent)}
+main p{margin:12px 0}
+main ul,main ol{margin:12px 0 12px 28px}
+main li{margin:5px 0}
+main blockquote{border-left:4px solid var(--accent);background:var(--card);
+padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;color:var(--fg)}
+main blockquote p{margin:6px 0}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-size:.88em;
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;
+padding:16px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:.85em}
+main a{color:var(--accent)}
+main img{max-width:100%;border:1px solid var(--border);border-radius:10px;
+margin:18px 0 6px;display:block}
+main em.caption,figcaption{color:var(--muted);font-size:.9em;display:block;
+margin:0 0 18px}
+table{border-collapse:collapse;margin:16px 0;width:100%;font-size:.93em}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card)}
+dl{margin:14px 0}
+dt{font-weight:600;margin-top:10px}
+dt code{font-size:.85em}
+dd{margin:2px 0 8px 18px;color:var(--fg)}
+hr{border:none;border-top:1px solid var(--border);margin:30px 0}
+footer{text-align:center;padding:36px 20px;color:var(--muted);
+border-top:1px solid var(--border);font-size:.88em}
+.kicker{color:var(--accent);font-style:italic;margin-bottom:20px;display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>muse<span class="dot">-</span>print</h1>
+<p>Drift-free Dymo label printing from a Raspberry Pi.</p>
+</header>
+<nav><a href="index.html" data-page="index">Home</a><a href="quickstart.html" data-page="quickstart">Quickstart</a><a href="the-journey.html" data-page="the-journey">The Journey</a><a href="drivers.html" data-page="drivers" class="active">Drivers</a><a href="esc-e.html" data-page="esc-e">ESC E</a><a href="camera.html" data-page="camera">Camera Loop</a><a href="api.html" data-page="api">API</a></nav>
+<main>
+<h1>Drivers</h1>
+<p>What gets installed on the Pi, and why — so you can reproduce this from a<br>fresh Debian 13 system.</p>
+<h2>The short version</h2>
+<table><thead><tr><th>Component</th><th>Choice</th><th>Why</th></tr></thead><tbody><tr><td>Driver</td><td><code>dymoprint</code> 2.5.0 via <code>pip</code></td><td>Debian&#x27;s <code>printer-driver-dymo</code> is empty; dymoprint speaks raw USB, no CUPS</td></tr><tr><td>Print pipeline</td><td>CUPS: <strong>not used</strong></td><td>Direct USB is simpler and fully sufficient</td></tr><tr><td>Imaging</td><td>Pillow</td><td>Render text to 1-bit bitmaps</td></tr><tr><td>USB</td><td>pyusb (via dymoprint)</td><td>Raw USB transport</td></tr><tr><td>Permissions</td><td>user in <code>lp</code> group</td><td>Read/write <code>/dev/bus/usb/*</code> without sudo</td></tr></tbody></table>
+<h2>Why not CUPS?</h2>
+<p>CUPS + a Dymo driver is the &quot;normal&quot; Linux printing path, but on Debian 13<br>(trixie) the <code>printer-driver-dymo</code> package ships <strong>documentation only</strong> —<br>no actual driver. Rather than backporting a driver or building CUPS filters,<br><code>dymoprint</code> talks to the printer directly over USB. For a single-purpose<br>label printer driven by scripts, that&#x27;s fewer moving parts and one less<br>daemon to keep alive.</p>
+<h2>Installation</h2>
+<pre><code># USB device access (log out/in afterwards)
+sudo usermod -aG lp $USER
+
+# dymoprint 2.5.0 — the version this was developed and tested against
+pip install --break-system-packages &quot;dymoprint==2.5.0&quot;
+
+# muse-print itself (pulls dymoprint&gt;=2.5.0, Pillow, pyusb)
+pip install --break-system-packages muse-print</code></pre>
+<h3>About <code>--break-system-packages</code></h3>
+<p>Debian 13&#x27;s <code>pip</code> refuses to install into the system Python without this<br>flag (&quot;externally managed environment,&quot; PEP 668). The alternatives are a<br>virtualenv or <code>pipx</code>; on a single-purpose Pi the flag is the pragmatic<br>choice. Nothing in this stack conflicts with Debian&#x27;s own packages.</p>
+<h3>Fonts</h3>
+<p>Text rendering needs a bold font. The default is DejaVu Sans Bold, which<br>ships with Debian:</p>
+<pre><code># usually already present; if not:
+sudo apt install fonts-dejavu-core</code></pre>
+<p><code>muse_print.render.find_font()</code> checks <code>/usr/share/fonts/truetype/dejavu/</code><br>(and the <code>/usr/share/fonts/TTF/</code> alternate) and raises a clear error if<br>neither exists.</p>
+<h2>Permissions in detail</h2>
+<p><code>dymoprint</code> opens the printer as a raw USB device. On Debian,<br><code>/dev/bus/usb/*</code> nodes are owned by <code>root:lp</code>, so membership in the <code>lp</code><br>group is what lets an unprivileged user print. Verify:</p>
+<pre><code>groups            # lp should be listed (after re-login)
+lsusb -d 0922:0021</code></pre>
+<h2>USB timeouts</h2>
+<p>Once during development the printer stopped responding to USB transfers<br>(device present, transfers timing out). The fix was a USB port reset:</p>
+<pre><code>echo 0 | sudo tee /sys/bus/usb/devices/1-1.2/authorized
+echo 1 | sudo tee /sys/bus/usb/devices/1-1.2/authorized</code></pre>
+<p>The path (<code>1-1.2</code>) is the physical port and varies by machine — look under<br><code>/sys/bus/usb/devices/</code> for the entry whose <code>idVendor</code>/<code>idProduct</code> match<br><code>0922</code>/<code>0021</code>. This needs sudo, but it&#x27;s a once-in-a-while recovery step,<br>not part of normal operation.</p>
+<h2>What dymoprint gives us (and what it doesn&#x27;t)</h2>
+<p><code>dymoprint</code> provides the USB transport and the protocol primitives:<br><code>line()</code> (raster row), <code>skipLines()</code> (blank feed), <code>statusRequest()</code>,<br>and — critically — <code>cut()</code>, which sends the Form Feed (<code>ESC E</code>) that<br>muse-print is built around.</p>
+<p>What it does <em>not</em> do is call <code>cut()</code> during normal printing, or manage<br>label registration at all. That&#x27;s the gap muse-print fills: see<br><a href="esc-e.html">ESC E</a>.</p>
+</main>
+<footer>
+muse-print &middot; <a href="https://github.com/marcocaggioni/muse-print">GitHub</a>
+&middot; MIT
+</footer>
+</body>
+</html>
