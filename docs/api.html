@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python API — muse-print</title>
+<style>
+:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--accent:#f0a500;
+--card:#161b22;--border:#30363d;--code:#1c2128}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+line-height:1.65}
+header{padding:52px 20px 36px;text-align:center;border-bottom:1px solid var(--border)}
+header h1{font-size:2.6em;letter-spacing:1px}
+header h1 .dot{color:var(--accent)}
+header p{color:var(--muted);max-width:640px;margin:10px auto 0;font-size:1.1em}
+nav{position:sticky;top:0;background:rgba(13,17,23,.96);
+border-bottom:1px solid var(--border);padding:10px 16px;text-align:center;z-index:10}
+nav a{color:var(--muted);text-decoration:none;margin:0 12px;font-size:.93em}
+nav a:hover,nav a.active{color:var(--accent)}
+nav a.active{font-weight:600}
+main{max-width:860px;margin:0 auto;padding:40px 22px 60px}
+main h1{font-size:2em;margin-bottom:18px}
+main h2{font-size:1.45em;margin:34px 0 12px;
+border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:4px}
+main h3{font-size:1.15em;margin:24px 0 8px;color:var(--accent)}
+main p{margin:12px 0}
+main ul,main ol{margin:12px 0 12px 28px}
+main li{margin:5px 0}
+main blockquote{border-left:4px solid var(--accent);background:var(--card);
+padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;color:var(--fg)}
+main blockquote p{margin:6px 0}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-size:.88em;
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;
+padding:16px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:.85em}
+main a{color:var(--accent)}
+main img{max-width:100%;border:1px solid var(--border);border-radius:10px;
+margin:18px 0 6px;display:block}
+main em.caption,figcaption{color:var(--muted);font-size:.9em;display:block;
+margin:0 0 18px}
+table{border-collapse:collapse;margin:16px 0;width:100%;font-size:.93em}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card)}
+dl{margin:14px 0}
+dt{font-weight:600;margin-top:10px}
+dt code{font-size:.85em}
+dd{margin:2px 0 8px 18px;color:var(--fg)}
+hr{border:none;border-top:1px solid var(--border);margin:30px 0}
+footer{text-align:center;padding:36px 20px;color:var(--muted);
+border-top:1px solid var(--border);font-size:.88em}
+.kicker{color:var(--accent);font-style:italic;margin-bottom:20px;display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>muse<span class="dot">-</span>print</h1>
+<p>Drift-free Dymo label printing from a Raspberry Pi.</p>
+</header>
+<nav><a href="index.html" data-page="index">Home</a><a href="quickstart.html" data-page="quickstart">Quickstart</a><a href="the-journey.html" data-page="the-journey">The Journey</a><a href="drivers.html" data-page="drivers">Drivers</a><a href="esc-e.html" data-page="esc-e">ESC E</a><a href="camera.html" data-page="camera">Camera Loop</a><a href="api.html" data-page="api" class="active">API</a></nav>
+<main>
+<h1>Python API</h1>
+<h2>One-shot printing</h2>
+<pre><code>from muse_print import print_text
+
+print_text(&quot;Giulia&quot;)               # one label
+print_text(&quot;Stella&quot;, copies=3)     # three copies, each re-registered via ESC E
+print_text(&quot;Long name here&quot;, font_size=140)</code></pre>
+<h2>Rendering text to bitmaps</h2>
+<pre><code>from muse_print import render_text
+
+img = render_text(&quot;Giulia&quot;)
+img.save(&quot;label.png&quot;)              # 1-bit PNG; pixel 1 = burned (black)
+
+# Tune the calibration:
+img = render_text(
+    &quot;Giulia&quot;,
+    font_size=180,      # base size; auto-shrinks if the text is long
+    image_height=280,   # bitmap height in px (label width direction)
+    lead_in=180,        # blank px before the text starts
+    left_shift=90,      # compensates the 450 Turbo&#x27;s edge bias
+    max_text_width=900, # shrink-to-fit threshold
+)</code></pre>
+<p><code>render_text</code> returns a PIL <code>Image</code> in mode <code>&#x27;1&#x27;</code>. Width covers lead-in +<br>text + right padding; the caller (or <code>LabelPrinter</code>) handles the feed after<br>the bitmap.</p>
+<h2>The printer class</h2>
+<pre><code>from muse_print import LabelPrinter
+
+printer = LabelPrinter(tape_size_mm=12, verbose=True)
+printer.print_text(&quot;Giulia&quot;, copies=2)
+printer.print_image(render_text(&quot;Custom&quot;))  # print a pre-rendered bitmap
+printer.form_feed()                          # advance to tear point, no print</code></pre>
+<p><code>print_image()</code> sends the bitmap, a small 100-line trailing margin, then<br><code>ESC E</code> (Form Feed) — the sensor-guided registration described in<br><a href="esc-e.html">ESC E</a>. <code>form_feed()</code> sends just the <code>ESC E</code>: the USB<br>equivalent of tapping the printer&#x27;s button.</p>
+<p>Raises <code>PrinterNotFoundError</code> (a <code>RuntimeError</code>) with a checklist when no<br>Dymo is reachable on USB.</p>
+<h2>Command line</h2>
+<pre><code>muse-print &quot;Giulia&quot;
+muse-print -n 3 &quot;Stella&quot;
+muse-print --font-size 120 &quot;Small&quot;
+muse-print --feed-only     # re-sync registration without printing
+python -m muse_print &quot;Giulia&quot;</code></pre>
+<h2>Calibration constants</h2>
+<p>Defaults live in <code>muse_print.render</code> (<code>IMAGE_HEIGHT</code>, <code>LEAD_IN</code>,<br><code>LEFT_SHIFT</code>, <code>FONT_SIZE</code>, …) and <code>muse_print.printer</code><br>(<code>TRAILING_BLANK_LINES = 100</code>). They were calibrated on a LabelWriter 450<br>Turbo with wide name-badge stock in October 2026; override per-call if<br>your stock or printer differs. The one constant you should <strong>not</strong> raise<br>is <code>TRAILING_BLANK_LINES</code> — see <a href="esc-e.md#why-the-trailing-margin-must-be-small">the gotcha</a>.</p>
+</main>
+<footer>
+muse-print &middot; <a href="https://github.com/marcocaggioni/muse-print">GitHub</a>
+&middot; MIT
+</footer>
+</body>
+</html>
