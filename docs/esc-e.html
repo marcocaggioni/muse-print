@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESC E: the Form Feed deep dive — muse-print</title>
+<style>
+:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--accent:#f0a500;
+--card:#161b22;--border:#30363d;--code:#1c2128}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+line-height:1.65}
+header{padding:52px 20px 36px;text-align:center;border-bottom:1px solid var(--border)}
+header h1{font-size:2.6em;letter-spacing:1px}
+header h1 .dot{color:var(--accent)}
+header p{color:var(--muted);max-width:640px;margin:10px auto 0;font-size:1.1em}
+nav{position:sticky;top:0;background:rgba(13,17,23,.96);
+border-bottom:1px solid var(--border);padding:10px 16px;text-align:center;z-index:10}
+nav a{color:var(--muted);text-decoration:none;margin:0 12px;font-size:.93em}
+nav a:hover,nav a.active{color:var(--accent)}
+nav a.active{font-weight:600}
+main{max-width:860px;margin:0 auto;padding:40px 22px 60px}
+main h1{font-size:2em;margin-bottom:18px}
+main h2{font-size:1.45em;margin:34px 0 12px;
+border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:4px}
+main h3{font-size:1.15em;margin:24px 0 8px;color:var(--accent)}
+main p{margin:12px 0}
+main ul,main ol{margin:12px 0 12px 28px}
+main li{margin:5px 0}
+main blockquote{border-left:4px solid var(--accent);background:var(--card);
+padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;color:var(--fg)}
+main blockquote p{margin:6px 0}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-size:.88em;
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;
+padding:16px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:.85em}
+main a{color:var(--accent)}
+main img{max-width:100%;border:1px solid var(--border);border-radius:10px;
+margin:18px 0 6px;display:block}
+main em.caption,figcaption{color:var(--muted);font-size:.9em;display:block;
+margin:0 0 18px}
+table{border-collapse:collapse;margin:16px 0;width:100%;font-size:.93em}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card)}
+dl{margin:14px 0}
+dt{font-weight:600;margin-top:10px}
+dt code{font-size:.85em}
+dd{margin:2px 0 8px 18px;color:var(--fg)}
+hr{border:none;border-top:1px solid var(--border);margin:30px 0}
+footer{text-align:center;padding:36px 20px;color:var(--muted);
+border-top:1px solid var(--border);font-size:.88em}
+.kicker{color:var(--accent);font-style:italic;margin-bottom:20px;display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>muse<span class="dot">-</span>print</h1>
+<p>Drift-free Dymo label printing from a Raspberry Pi.</p>
+</header>
+<nav><a href="index.html" data-page="index">Home</a><a href="quickstart.html" data-page="quickstart">Quickstart</a><a href="the-journey.html" data-page="the-journey">The Journey</a><a href="drivers.html" data-page="drivers">Drivers</a><a href="esc-e.html" data-page="esc-e" class="active">ESC E</a><a href="camera.html" data-page="camera">Camera Loop</a><a href="api.html" data-page="api">API</a></nav>
+<main>
+<h1>ESC E: the Form Feed deep dive</h1>
+<p>The technical heart of muse-print. If you only read one page of these<br>docs, make it <a href="the-journey.html">The Journey</a>; this page is the protocol<br>reference behind it.</p>
+<h2>The problem, precisely</h2>
+<p><code>dymoprint</code>&#x27;s normal print path ends with <code>skipLines(margin)</code> — the host<br>sends N blank raster lines to advance the stock so the label&#x27;s end reaches<br>the tear bar. The host is <em>assuming</em> a fixed number of lines per label<br>pitch. Any discrepancy between the assumed pitch and the real one —<br>mechanical tolerance, thermal expansion, rounding in the line count —<br>becomes a registration error, and because each print starts where the last<br>one stopped, the error <strong>accumulates</strong>: label 2 off by ε, label 3 off by<br>2ε, and so on.</p>
+<p>The printer&#x27;s physical button doesn&#x27;t have this problem, because the<br>button doesn&#x27;t count lines.</p>
+<h2>What the button does</h2>
+<p>The LabelWriter 450 series has a <strong>label-gap sensor</strong> in the paper path.<br>The label stock has detectable gaps between labels. When you press the<br>button, the firmware feeds the motor forward until the sensor sees the next<br>gap, then advances a fixed small distance to the tear bar and stops. It&#x27;s a<br>closed loop: the printer measures where the stock actually is.</p>
+<h2>ESC E</h2>
+<p>The Dymo printer protocol exposes this as <strong>Form Feed</strong>: <code>ESC</code> <code>E</code><br>(bytes <code>0x1B 0x45</code>). Per the LabelWriter 450 Series Technical Reference,<br>it &quot;can be used after every label.&quot; The firmware performs the same<br>gap-seek the button triggers.</p>
+<p>In <code>dymoprint</code> 2.5.0 (<code>dymoprint/labeler.py</code>):</p>
+<pre><code>def cut(self):
+    &quot;&quot;&quot;Set instruction to trigger cutting of the tape. (MLF)&quot;&quot;&quot;
+    cmd = [ESC, ord(&quot;E&quot;)]
+    self.buildCommand(cmd)</code></pre>
+<p>(The name is a historical misnomer — the 450 Turbo has no cutter; on this<br>model the command is a form feed.) Nothing in dymoprint&#x27;s print path calls<br>it. muse-print calls it after every label.</p>
+<h2>The exact byte sequence per label</h2>
+<p><code>LabelPrinter.print_image()</code> builds one USB transaction:</p>
+<ol><li><code>ESC C 0</code> — tape color (from dymoprint&#x27;s <code>rawPrintLabel</code> convention)</li><li>For each bitmap row: <code>bytesPerLine</code> + <code>SYN</code> + row bytes</li><li><code>skipLines(100)</code> — 100 blank lines, <strong>small on purpose</strong></li><li><code>ESC E</code> — Form Feed: firmware gap-seeks to the tear bar</li><li><code>ESC A</code> — status request</li></ol>
+<h2>Why the trailing margin must be small</h2>
+<p>This is the gotcha that cost a round of test labels. The gap sensor looks<br><em>forward</em> — it finds the <em>next</em> gap from wherever the stock currently sits.<br>If you feed a full label pitch of blanks and <em>then</em> send ESC E, the current<br>label&#x27;s gap is already behind the sensor, so the firmware seeks the<br><em>following</em> gap: <strong>two pitches of feed</strong>, and the label overshoots the tear<br>bar.</p>
+<p>The 100 blank lines in step 3 only move the printed area clear of the<br>thermal head. The current label&#x27;s gap is still ahead of the sensor, so<br>ESC E finds the right one. The rule:</p>
+<blockquote><p><strong>Small margin + ESC E = one pitch. Full margin + ESC E = two pitches.</strong></p></blockquote>
+<h2>Failure mode</h2>
+<p>If the gap sensor ever fails to see a gap (wrong stock, sensor dirty),<br>the firmware falls back to a maximum feed defined in NVRAM (around 7.5&quot; on<br>the 450 series) — the label would feed far too long. This never happened<br>during development, and with the microscope camera it would be visible<br>immediately, but it&#x27;s worth knowing the failure is loud, not subtle.</p>
+<h2>Protocol notes (unverified in dymoprint)</h2>
+<p>The protocol also defines a <strong>Short Form Feed</strong>, <code>ESC G</code> (<code>0x1B 0x47</code>),<br>intended for positioning <em>between</em> labels of a multi-copy job, and a status<br>bit (<code>ESC A</code> response, bit 1) reporting top-of-form. dymoprint 2.5.0<br>exposes neither, so muse-print implements multi-copy as repeated<br>print + ESC E cycles — verified behavior rather than protocol speculation.</p>
+</main>
+<footer>
+muse-print &middot; <a href="https://github.com/marcocaggioni/muse-print">GitHub</a>
+&middot; MIT
+</footer>
+</body>
+</html>
