@@ -27,6 +27,7 @@ print in a row.
 - **[Drivers](drivers.md)** — what gets installed and why (Debian trixie gotchas)
 - **[ESC E deep dive](esc-e.md)** — the Form Feed discovery, in technical detail
 - **[The camera loop](camera.md)** — how a USB microscope camera made the printer observable
+- **[Chemical labels](chemical-labels.md)** — GHS hazard diamonds: pictograms, blackouts, and a compliant SLS label
 - **[Python API](api.md)** — `muse_print` as a library
 
 ## The setup
