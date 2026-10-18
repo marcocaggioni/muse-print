@@ -1,4 +1,4 @@
-"""Batch reprint 5 H&S ingredient labels: new tel 513-568-5604 + source QR codes."""
+"""Batch reprint 5 H&S ingredient labels: new tel 555-0100 + source QR codes."""
 import sys, time
 sys.path.insert(0, "/home/marcocaggioni/ghs")
 sys.path.insert(0, "/home/marcocaggioni/.local/lib/python3.13/site-packages")
@@ -20,7 +20,7 @@ ROW_X = [
 ]
 SYMBOL_SIZE = 85
 BLACKOUT_SIZE = 65
-TEL = "513-568-5604"
+TEL = "555-0100"
 
 def draw_diamond(draw, cx, cy, size, fill):
     r = size // 2
