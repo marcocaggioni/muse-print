@@ -1,0 +1,2 @@
+[console_scripts]
+muse-print = muse_print.cli:main
