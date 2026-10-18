@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Journey — muse-print</title>
+<style>
+:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--accent:#f0a500;
+--card:#161b22;--border:#30363d;--code:#1c2128}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+line-height:1.65}
+header{padding:52px 20px 36px;text-align:center;border-bottom:1px solid var(--border)}
+header h1{font-size:2.6em;letter-spacing:1px}
+header h1 .dot{color:var(--accent)}
+header p{color:var(--muted);max-width:640px;margin:10px auto 0;font-size:1.1em}
+nav{position:sticky;top:0;background:rgba(13,17,23,.96);
+border-bottom:1px solid var(--border);padding:10px 16px;text-align:center;z-index:10}
+nav a{color:var(--muted);text-decoration:none;margin:0 12px;font-size:.93em}
+nav a:hover,nav a.active{color:var(--accent)}
+nav a.active{font-weight:600}
+main{max-width:860px;margin:0 auto;padding:40px 22px 60px}
+main h1{font-size:2em;margin-bottom:18px}
+main h2{font-size:1.45em;margin:34px 0 12px;
+border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:4px}
+main h3{font-size:1.15em;margin:24px 0 8px;color:var(--accent)}
+main p{margin:12px 0}
+main ul,main ol{margin:12px 0 12px 28px}
+main li{margin:5px 0}
+main blockquote{border-left:4px solid var(--accent);background:var(--card);
+padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;color:var(--fg)}
+main blockquote p{margin:6px 0}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-size:.88em;
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;
+padding:16px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:.85em}
+main a{color:var(--accent)}
+main img{max-width:100%;border:1px solid var(--border);border-radius:10px;
+margin:18px 0 6px;display:block}
+main em.caption,figcaption{color:var(--muted);font-size:.9em;display:block;
+margin:0 0 18px}
+table{border-collapse:collapse;margin:16px 0;width:100%;font-size:.93em}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card)}
+dl{margin:14px 0}
+dt{font-weight:600;margin-top:10px}
+dt code{font-size:.85em}
+dd{margin:2px 0 8px 18px;color:var(--fg)}
+hr{border:none;border-top:1px solid var(--border);margin:30px 0}
+footer{text-align:center;padding:36px 20px;color:var(--muted);
+border-top:1px solid var(--border);font-size:.88em}
+.kicker{color:var(--accent);font-style:italic;margin-bottom:20px;display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>muse<span class="dot">-</span>print</h1>
+<p>Drift-free Dymo label printing from a Raspberry Pi.</p>
+</header>
+<nav><a href="index.html" data-page="index">Home</a><a href="quickstart.html" data-page="quickstart">Quickstart</a><a href="the-journey.html" data-page="the-journey" class="active">The Journey</a><a href="drivers.html" data-page="drivers">Drivers</a><a href="esc-e.html" data-page="esc-e">ESC E</a><a href="camera.html" data-page="camera">Camera Loop</a><a href="api.html" data-page="api">API</a></nav>
+<main>
+<h1>The Journey</h1>
+<p>*An engineering log: how a Sunday-morning label printer turned into an<br>eleven-byte fix. October 18, 2026.*</p>
+<h2>The setup</h2>
+<p>The starting point was a Raspberry Pi 4 already running as a<br><a href="https://github.com/marcocaggioni/muselab">Muse Gadget</a> — Debian 13, paired,<br>controllable by conversation. The goal was simple, the kind of thing that<br>should take five minutes: plug in a <strong>Dymo LabelWriter 450 Turbo</strong> over USB<br>and print name tags by asking in chat. &quot;Print a label saying Giulia.&quot;</p>
+<p>The printer enumerates as USB ID <code>0922:0021</code>. The label stock is the wide<br>name-badge kind, with a red diamond grid pre-printed along one edge.</p>
+<h2>The driver hunt</h2>
+<p>First surprise: Debian trixie&#x27;s <code>printer-driver-dymo</code> package is<br><strong>empty</strong> — docs only, no driver. CUPS was a dead end before it started.</p>
+<p>The Muse gadget went looking and found<br><a href="https://github.com/computerlyrik/dymoprint"><strong>dymoprint</strong></a> 2.5.0, an<br>open-source tool that talks to LabelWriters over <strong>raw USB</strong>, no CUPS<br>involved. Installed with:</p>
+<pre><code>pip install --break-system-packages dymoprint</code></pre>
+<p>(The <code>--break-system-packages</code> flag is Debian 13&#x27;s way of making you<br>acknowledge you&#x27;re installing outside <code>apt</code> — see <a href="drivers.html">Drivers</a>.)<br>The printing user was added to the <code>lp</code> group so <code>/dev/bus/usb</code> is readable<br>without sudo.</p>
+<h2>First success</h2>
+<p>The first label printed on the first try: text rendered with PIL into a<br>1-bit bitmap (pixel value 1 = burned black), converted to the printer&#x27;s<br>row-major byte format, streamed over USB. Name tags for the family came out<br>looking right. Calibration settled quickly:</p>
+<ul><li>Image height 280 px, DejaVuSans-Bold at 180 pt, auto-scaled for long names</li><li>180 px of blank lead-in before the text</li><li>Text shifted left 90 px — the 450 Turbo biases output toward one edge</li></ul>
+<p>It felt done. It wasn&#x27;t.</p>
+<h2>The drift</h2>
+<p>The requirement was casual — print a few name tags in a row — and that&#x27;s<br>exactly what broke it. The pattern was unmistakable:</p>
+<blockquote><p>The first label, printed right after pressing the printer&#x27;s physical</p><p>button, is perfect. The second is slightly off. The third is worse.</p></blockquote>
+<p>Every print started from wherever the <em>previous</em> print had left the stock,<br>and the error accumulated. The only known-good state was &quot;just pressed the<br>button.&quot; Something had to re-establish that state before every print —<br>without a finger.</p>
+<h2>Giving Muse eyes</h2>
+<p>The fix for &quot;I can&#x27;t see what&#x27;s happening&quot; was a USB microscope camera<br>pointed at the printer&#x27;s output slot. The loop became:</p>
+<pre><code># on the Pi: print, photograph, shrink, transfer
+python3 print-label.py &quot;D1&quot;
+ffmpeg -y -f v4l2 -s 320x240 -i /dev/video0 -frames:v 1 -q:v 20 d1.jpg
+python3 shrink.py d1.jpg d1s.jpg   # 160x120 grayscale, ~2 KB
+base64 -w0 d1s.jpg                # pipe home through ssh, decode, view</code></pre>
+<p>Print. Look. Measure. Adjust. Up to five prints per round, button-press<br>resets between rounds. This is the loop that made everything below<br>possible — and the photo at the top of this page is that loop, running:</p>
+<p><img src="images/learning-setup.jpg" alt="The autonomous learning loop: a Raspberry Pi 4 with Sense HAT running the Muse Gadget, a USB microscope camera aimed at the Dymo LabelWriter 450 Turbo, with a freshly printed &quot;F3&quot; test label coming out."></p>
+<p>*The autonomous learning loop in action: Raspberry Pi 4 with Sense HAT<br>(rainbow LEDs) running the Muse Gadget, USB microscope camera aimed at the<br>Dymo LabelWriter 450 Turbo, with a freshly printed &quot;F3&quot; test label coming<br>out of the slot. The camera let Muse see where each print started and ended<br>and iterate without touching the printer.*</p>
+<h2>The investigation</h2>
+<p>With the camera running, the drift was measured, not guessed. A sequence of<br>three prints showed the label sticking out less each time — the feed was<br>consistently <em>short</em>. Bumping the assumed pitch from 1287 to 1400 lines<br>helped one round and drifted the next. Chasing the pitch number was whack-a-<br>molecule: the number was never quite right because **counting lines from<br>the host is open-loop**. Any error — mechanical, thermal, rounding —<br>accumulates forever.</p>
+<p>Meanwhile, one fact kept nagging: <em>the button always works.</em> Pressing the<br>printer&#x27;s physical button feeds the stock to exactly the right place, every<br>time. So the printer <em>knows</em> where the tear point is. The question became:<br>can USB ask the printer to do what the button does?</p>
+<h2>The breakthrough</h2>
+<p>Yes. The Dymo printer protocol (documented in the LabelWriter 450 Series<br>Technical Reference) includes a <strong>Form Feed</strong> command: <code>ESC E</code>, bytes<br><code>0x1B 0x45</code>. When the firmware receives it, it feeds the stock forward<br>until its <strong>label-gap sensor</strong> detects the next gap between labels, then<br>advances to the tear bar and stops. That is precisely what the physical<br>button does — and the technical reference notes it &quot;can be used after every<br>label.&quot;</p>
+<p>And dymoprint already implements it — as <code>DymoLabeler.cut()</code><br>(<code>cmd = [ESC, ord(&quot;E&quot;)]</code>) — but nothing in the normal print path ever calls<br>it. The button-equivalent was sitting in the driver the whole time, unused.</p>
+<h2>The gotcha</h2>
+<p>The naive fix — &quot;just append ESC E after printing&quot; — overshoots. The old<br>code fed a full label pitch of blank lines <em>and then</em> ESC E sought the<br><em>following</em> gap: two pitches of feed, label ruined. The margin before the<br>Form Feed must be <strong>small</strong>: just enough blank lines to move the printed<br>area clear of the thermal head (100 lines), leaving the gap sensor still<br>ahead of the current label&#x27;s gap. Then ESC E finds the <em>right</em> gap.</p>
+<p>The final sequence per label:</p>
+<ol><li>Stream the text bitmap</li><li>Feed 100 blank lines (clear the head, gap still ahead)</li><li><code>ESC E</code> — firmware seeks the next gap via its sensor, stops at the tear bar</li></ol>
+<h2>Verification</h2>
+<p>Three consecutive prints, no button presses between them, photographed by<br>the microscope camera: all three labels stick out to exactly the same<br>point. The drift is gone — not tuned away, but <em>structurally</em> gone, because<br>every print now re-registers against the printer&#x27;s own sensor instead of<br>the host&#x27;s line count.</p>
+<h2>Lessons learned</h2>
+<ol><li><strong>The hardware knows more than the host.</strong> The printer had a gap sensor</li></ol>
+<p>the whole time; the original approach ignored it and counted lines<br>instead. When the device can close the loop, let it.</p>
+<ol><li><strong>Make the system observable before optimizing it.</strong> The camera turned</li></ol>
+<p>&quot;the pitch is probably 1287&quot; into measured evidence. Every wrong turn<br>(bumping the pitch, the overshoot experiment) was cheap because the<br>result was visible in seconds.</p>
+<ol><li><strong>Read the protocol.</strong> The answer was in the technical reference and in</li></ol>
+<p>the driver&#x27;s own source (<code>cut()</code>), hiding in plain sight. Eleven bytes —<br><code>0x1B 0x45</code> — replaced an entire calibration problem.</p>
+<ol><li><strong>Beware additive fixes.</strong> ESC E on top of the old full-pitch margin</li></ol>
+<p>fed two pitches. The new mechanism replaced the old one; it didn&#x27;t stack<br>on it.</p>
+<hr>
+<p>*Continue to the <a href="esc-e.html">ESC E deep dive</a> for the protocol details, or<br><a href="drivers.html">Drivers</a> to reproduce the setup from scratch.*</p>
+</main>
+<footer>
+muse-print &middot; <a href="https://github.com/marcocaggioni/muse-print">GitHub</a>
+&middot; MIT
+</footer>
+</body>
+</html>
