@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>muse-print — muse-print</title>
+<style>
+:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--accent:#f0a500;
+--card:#161b22;--border:#30363d;--code:#1c2128}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+line-height:1.65}
+header{padding:52px 20px 36px;text-align:center;border-bottom:1px solid var(--border)}
+header h1{font-size:2.6em;letter-spacing:1px}
+header h1 .dot{color:var(--accent)}
+header p{color:var(--muted);max-width:640px;margin:10px auto 0;font-size:1.1em}
+nav{position:sticky;top:0;background:rgba(13,17,23,.96);
+border-bottom:1px solid var(--border);padding:10px 16px;text-align:center;z-index:10}
+nav a{color:var(--muted);text-decoration:none;margin:0 12px;font-size:.93em}
+nav a:hover,nav a.active{color:var(--accent)}
+nav a.active{font-weight:600}
+main{max-width:860px;margin:0 auto;padding:40px 22px 60px}
+main h1{font-size:2em;margin-bottom:18px}
+main h2{font-size:1.45em;margin:34px 0 12px;
+border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:4px}
+main h3{font-size:1.15em;margin:24px 0 8px;color:var(--accent)}
+main p{margin:12px 0}
+main ul,main ol{margin:12px 0 12px 28px}
+main li{margin:5px 0}
+main blockquote{border-left:4px solid var(--accent);background:var(--card);
+padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;color:var(--fg)}
+main blockquote p{margin:6px 0}
+code{background:var(--code);padding:2px 6px;border-radius:4px;font-size:.88em;
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;
+padding:16px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:.85em}
+main a{color:var(--accent)}
+main img{max-width:100%;border:1px solid var(--border);border-radius:10px;
+margin:18px 0 6px;display:block}
+main em.caption,figcaption{color:var(--muted);font-size:.9em;display:block;
+margin:0 0 18px}
+table{border-collapse:collapse;margin:16px 0;width:100%;font-size:.93em}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--card)}
+dl{margin:14px 0}
+dt{font-weight:600;margin-top:10px}
+dt code{font-size:.85em}
+dd{margin:2px 0 8px 18px;color:var(--fg)}
+hr{border:none;border-top:1px solid var(--border);margin:30px 0}
+footer{text-align:center;padding:36px 20px;color:var(--muted);
+border-top:1px solid var(--border);font-size:.88em}
+.kicker{color:var(--accent);font-style:italic;margin-bottom:20px;display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>muse<span class="dot">-</span>print</h1>
+<p>Drift-free Dymo label printing from a Raspberry Pi.</p>
+</header>
+<nav><a href="index.html" data-page="index" class="active">Home</a><a href="quickstart.html" data-page="quickstart">Quickstart</a><a href="the-journey.html" data-page="the-journey">The Journey</a><a href="drivers.html" data-page="drivers">Drivers</a><a href="esc-e.html" data-page="esc-e">ESC E</a><a href="camera.html" data-page="camera">Camera Loop</a><a href="api.html" data-page="api">API</a></nav>
+<main>
+<h1>muse-print</h1>
+<p>Print text labels on a <strong>Dymo LabelWriter 450 Turbo</strong> from a Raspberry Pi —<br>with drift-free label registration, so back-to-back prints always land<br>exactly where the first one did.</p>
+<pre><code>pip install muse-print
+muse-print &quot;Giulia&quot;</code></pre>
+<h2>The one-line summary</h2>
+<p>Normal Linux Dymo printing (<code>dymoprint</code>) positions the tear point by<br><strong>counting blank lines from the host</strong> — and any tiny pitch error<br>accumulates with every label. muse-print instead ends each print with a<br><strong>Form Feed</strong> (<code>ESC E</code>, <code>0x1B 0x45</code>): the printer&#x27;s firmware uses its own<br>label-gap sensor to find the next gap and stops exactly at the tear bar.<br>It&#x27;s the USB equivalent of pressing the printer&#x27;s physical button — and it<br>means every label starts from the same condition, no matter how many you<br>print in a row.</p>
+<h2>Start here</h2>
+<ul><li><strong><a href="quickstart.html">Quickstart</a></strong> — install on a fresh Pi, print your first label</li><li><strong><a href="the-journey.html">The Journey</a></strong> — the full engineering story: the driver hunt, the drift, the camera, the breakthrough</li><li><strong><a href="drivers.html">Drivers</a></strong> — what gets installed and why (Debian trixie gotchas)</li><li><strong><a href="esc-e.html">ESC E deep dive</a></strong> — the Form Feed discovery, in technical detail</li><li><strong><a href="camera.html">The camera loop</a></strong> — how a USB microscope camera made the printer observable</li><li><strong><a href="api.html">Python API</a></strong> — <code>muse_print</code> as a library</li></ul>
+<h2>The setup</h2>
+<p><img src="images/learning-setup.jpg" alt="The autonomous learning loop: a Raspberry Pi 4 with Sense HAT running the Muse Gadget, a USB microscope camera aimed at the Dymo LabelWriter 450 Turbo, with a freshly printed &quot;F3&quot; test label coming out."></p>
+<p>*The autonomous learning loop in action: Raspberry Pi 4 with Sense HAT<br>(rainbow LEDs) running the Muse Gadget, USB microscope camera aimed at the<br>Dymo LabelWriter 450 Turbo, with a freshly printed &quot;F3&quot; test label coming<br>out. Print, photograph, measure, adjust — without touching the printer.*</p>
+<h2>Status</h2>
+<ul><li>Tested on Raspberry Pi 4, Debian 13 (trixie), Dymo LabelWriter 450 Turbo (USB ID <code>0922:0021</code>)</li><li>Camera-verified: 3 consecutive prints land identically</li><li><code>pip install muse-print</code> — PyPI release pending</li></ul>
+<p><a href="https://github.com/marcocaggioni/muse-print">GitHub</a> ·<br><a href="https://github.com/marcocaggioni/muse-print/blob/main/PHILOSOPHY.md">Philosophy</a></p>
+</main>
+<footer>
+muse-print &middot; <a href="https://github.com/marcocaggioni/muse-print">GitHub</a>
+&middot; MIT
+</footer>
+</body>
+</html>
