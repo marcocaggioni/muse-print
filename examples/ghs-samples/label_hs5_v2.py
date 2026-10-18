@@ -61,7 +61,7 @@ def print_label(name, signal, h_codes, show, qr_url):
     if h_codes:
         d.text((20, y), h_codes, font=font, fill=1)
     # QR code to source URL, bottom-center
-    qr = qrcode.QRCode(box_size=2, border=1)
+    qr = qrcode.QRCode(box_size=3, border=1)
     qr.add_data(qr_url); qr.make(fit=True)
     qi = qr.make_image(fill_color="black", back_color="white").convert("1")
     qi = qi.point(lambda p: 1 if p == 0 else 0)
