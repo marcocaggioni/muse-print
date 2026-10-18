@@ -22,6 +22,7 @@ PAGES = [
     ("drivers", "Drivers"),
     ("esc-e", "ESC E"),
     ("camera", "Camera Loop"),
+    ("chemical-labels", "Chemical Labels"),
     ("api", "API"),
 ]
 
