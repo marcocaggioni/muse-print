@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[test]" 2>/dev/null || pip install -e .
+
+      - name: Import package
+        run: python -c "import muse_print; print(muse_print.__version__)"
+
+      - name: CLI help
+        run: muse-print --help
+
+      - name: Render bitmaps (no printer needed)
+        run: |
+          python - <<'EOF'
+          from muse_print import render_text, LabelPrinter
+          for text in ["Giulia", "Stella", "A very long name that must auto-scale down"]:
+              img = render_text(text)
+              assert img.mode == "1", img.mode
+              matrix = LabelPrinter._image_to_matrix(img)
+              assert len(matrix) == img.width
+              assert all(len(row) == (img.height + 7) // 8 for row in matrix)
+              print(f"OK {text!r}: {img.width}x{img.height}, {len(matrix)} rows")
+          EOF
+
+      - name: Example script compiles
+        run: python -m py_compile examples/basic.py
+
+      - name: Docs build
+        run: |
+          python docs/build.py
+          test -f docs/index.html
