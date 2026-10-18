@@ -1,0 +1,90 @@
+# muse-print
+
+Print text labels on a **Dymo LabelWriter 450 Turbo** from a Raspberry Pi —
+with **drift-free label registration**, so back-to-back prints always land
+exactly where the first one did.
+
+```bash
+pip install muse-print
+muse-print "Giulia"
+```
+
+That's it. One label, perfectly registered, torn off at the tear bar.
+
+## Why this exists
+
+Out of the box, the usual way to print Dymo labels from Linux (`dymoprint`)
+positions the tear point by counting blank lines from the host. Any tiny
+error in the assumed label pitch accumulates: the second label is slightly
+off, the third worse. The only reliable reset was pressing the printer's
+physical button.
+
+**muse-print** instead ends every print with a **Form Feed** (`ESC E`,
+`0x1B 0x45`). The printer's firmware uses its own label-gap sensor to find
+the next gap and stops exactly at the tear bar — the USB equivalent of
+pressing the button. Every label starts from the same condition, no matter
+how many you print in a row.
+
+📖 **[Full documentation →](https://marcocaggioni.github.io/muse-print/)**
+— including the complete engineering story of how this was discovered
+([The Journey](docs/the-journey.md)).
+
+![The autonomous learning setup: Raspberry Pi 4 with Sense HAT running the Muse Gadget, USB camera aimed at the Dymo LabelWriter 450 Turbo](images/learning-setup.jpg)
+
+*The autonomous learning setup: Raspberry Pi 4 with Sense HAT running the
+Muse Gadget, USB microscope camera aimed at the Dymo LabelWriter 450 Turbo —
+print, photograph, measure, adjust, without touching the printer.*
+
+## Quick start (Raspberry Pi)
+
+```bash
+# 1. Plug in the Dymo LabelWriter 450 Turbo via USB and power it on.
+
+# 2. Give your user access to the USB device (log out/in after):
+sudo usermod -aG lp $USER
+
+# 3. Install (Debian 13 requires --break-system-packages):
+pip install --break-system-packages muse-print
+
+# 4. Print:
+muse-print "Hello World"
+
+# 5. Three copies, each perfectly registered:
+muse-print -n 3 "Stella"
+```
+
+See [docs/quickstart.md](docs/quickstart.md) for the full walkthrough and
+[docs/drivers.md](docs/drivers.md) for why `dymoprint` and not CUPS.
+
+## Python API
+
+```python
+from muse_print import print_text, render_text, LabelPrinter
+
+print_text("Giulia")                 # one label
+print_text("Stella", copies=3)       # three, all registered identically
+
+printer = LabelPrinter()
+printer.form_feed()                  # advance to tear point without printing
+img = render_text("Custom", font_size=120)
+printer.print_image(img)             # print a pre-rendered bitmap
+```
+
+## Repository layout
+
+```
+src/muse_print/   the pip package (render, printer, cli)
+docs/             documentation sources (markdown) + built site
+examples/         runnable examples
+.github/workflows CI + GitHub Pages deploy
+```
+
+## Status
+
+- ✅ Tested on Raspberry Pi 4, Debian 13 (trixie), Dymo LabelWriter 450 Turbo
+- ✅ Camera-verified: 3 consecutive prints land identically
+- 🚧 PyPI release pending
+
+## License
+
+MIT
