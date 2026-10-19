@@ -96,7 +96,8 @@ border-top:1px solid var(--border);font-size:.88em}
 <p><code>examples/ghs-samples/ghs_symbols.py</code> provides:</p>
 <ul><li><code>ghs_symbol_1bit(key, size)</code> — rasterize one pictogram to a 1-bit PIL image</li><li><code>GRID</code> constants and a <code>draw_diamond</code> helper for the 1-2-3-2-1 layout</li><li><code>blackout_grid(img)</code> — fill all nine diamonds (the no-hazard case)</li></ul>
 <p>The folder also carries all nine SVGs, pre-rendered 1-bit PNGs, a contact<br>sheet, and the full series of calibration test scripts (<code>test_chem*.py</code>)<br>plus the finished label scripts (<code>label_sls.py</code>, <code>label_sls_qr.py</code>).</p>
-<h2>Try it</h2>
+<h2>Run it in your browser</h2>
+<p>The whole station also runs as a single self-contained page — no Pi<br>required. Open<br><strong><a href="label-app.html">the browser label station</a></strong> in Chrome or Edge on the<br>computer with the Dymo plugged in, pick a chemical, and click the yellow<br>Print button. It runs the same label code through Pyodide and prints via<br>WebUSB, producing byte-identical USB traffic to the Pi&#x27;s <code>dymoprint</code><br>pipeline. The page ships with demo owner data (555-0100) — type your real<br>number at runtime; it never enters the page itself.</p>
 <pre><code># From the repo:
 python examples/ghs-samples/label_sls_qr.py</code></pre>
 <p>Adapt <code>label_sls_qr.py</code>: change the <code>show</code> dict to map your chemical&#x27;s<br>applicable <code>(row, pos)</code> positions to pictogram keys, update the text fields,<br>and print. Everything else — geometry, blackouts, the ESC E pipeline — stays<br>the same.</p>
