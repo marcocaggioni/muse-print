@@ -28,6 +28,7 @@ print in a row.
 - **[ESC E deep dive](esc-e.md)** — the Form Feed discovery, in technical detail
 - **[The camera loop](camera.md)** — how a USB microscope camera made the printer observable
 - **[Chemical labels](chemical-labels.md)** — GHS hazard diamonds: pictograms, blackouts, and a compliant SLS label
+- **[Browser label station](label-app.html)** — the whole label station as one HTML page: no Pi needed, prints to the Dymo over WebUSB
 - **[Python API](api.md)** — `muse_print` as a library
 
 ## The setup
