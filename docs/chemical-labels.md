@@ -104,7 +104,16 @@ The folder also carries all nine SVGs, pre-rendered 1-bit PNGs, a contact
 sheet, and the full series of calibration test scripts (`test_chem*.py`)
 plus the finished label scripts (`label_sls.py`, `label_sls_qr.py`).
 
-## Try it
+## Run it in your browser
+
+The whole station also runs as a single self-contained page — no Pi
+required. Open
+**[the browser label station](label-app.html)** in Chrome or Edge on the
+computer with the Dymo plugged in, pick a chemical, and click the yellow
+Print button. It runs the same label code through Pyodide and prints via
+WebUSB, producing byte-identical USB traffic to the Pi's `dymoprint`
+pipeline. The page ships with demo owner data (555-0100) — type your real
+number at runtime; it never enters the page itself.
 
 ```bash
 # From the repo:
