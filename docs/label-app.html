@@ -196,6 +196,11 @@ _box = _PRINT_BOX.replace("__MATRIX_B64__", _b64)
 _box = _box.replace("__COPIES__", str(int(copies)))
 _box = _box.replace("__COPIES_LABEL__",
                     f"{int(copies)} label" + ("" if int(copies) == 1 else "s"))
+# Restore the print box's real closing script tag. It travels through the
+# page escaped (so the outer module script in label_app.html is never
+# terminated early) and is unescaped here at runtime, built without a literal
+# closer in the Python source for the same reason.
+_box = _box.replace("<\\\\/script>", "</scr" + "ipt>")
 components.html(_box, height=132)
 
 `;
