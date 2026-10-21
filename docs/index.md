@@ -29,6 +29,7 @@ print in a row.
 - **[The camera loop](camera.md)** — how a USB microscope camera made the printer observable
 - **[Chemical labels](chemical-labels.md)** — GHS hazard diamonds: pictograms, blackouts, and a compliant SLS label
 - **[Browser label station](label-app.html)** — the whole label station as one HTML page: no Pi needed, prints to the Dymo over WebUSB
+- **[Text label app](text-label-app.html)** — plain text labels as one HTML page: one text box, single or double line, font auto-fits the text; prints over WebUSB
 - **[Python API](api.md)** — `muse_print` as a library
 
 ## The setup
