@@ -30,7 +30,10 @@ print in a row.
 - **[Chemical labels](chemical-labels.md)** — GHS hazard diamonds: pictograms, blackouts, and a compliant SLS label
 - **[Browser label station](label-app.html)** — the whole label station as one HTML page: no Pi needed, prints to the Dymo over WebUSB
 - **[Text label app](text-label-app.html)** — plain text labels as one HTML page: one text box, single or double line, font auto-fits the text; prints over WebUSB
+- **[JSON label app](json-label-app.html)** — chemical/sample labels from a JSON string: paste JSON describing one or more labels (name, signal word, H-codes, pictograms, QR, expiration date), preview, and print over WebUSB. The page documents its own schema, so an AI agent pointed at it can generate the JSON for you
 - **[Python API](api.md)** — `muse_print` as a library
+
+Three browser apps share one print pipeline: the browser label station is the full chemical label station (pick a chemical from a list), the text label app prints plain text, and the JSON label app prints chemical/sample labels from a pasted JSON string — including an expiration date for the sample. All three run as a single HTML page with no Pi needed, printing to the Dymo over WebUSB.
 
 ## The setup
 
