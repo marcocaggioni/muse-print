@@ -70,6 +70,14 @@ img = render_text("Custom", font_size=120)
 printer.print_image(img)             # print a pre-rendered bitmap
 ```
 
+## Browser apps (no Pi needed)
+
+The label apps also run as single self-contained pages — open in Chrome/Edge on the computer with the Dymo plugged in and print over WebUSB:
+
+- **Browser label station** — https://marcocaggioni.github.io/muse-print/label-app.html — the full chemical label station: pick a chemical, print.
+- **Text label app** — https://marcocaggioni.github.io/muse-print/text-label-app.html — plain text labels, one or two lines, font auto-fits the text.
+- **JSON label app** — https://marcocaggioni.github.io/muse-print/json-label-app.html — chemical/sample labels from a pasted JSON string (one or more labels, with an expiration date). The page documents its own JSON schema, so an AI agent pointed at it can generate the JSON.
+
 ## Repository layout
 
 ```
