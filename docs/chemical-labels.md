@@ -115,6 +115,14 @@ WebUSB, producing byte-identical USB traffic to the Pi's `dymoprint`
 pipeline. The page ships with demo owner data (555-0100) — type your real
 number at runtime; it never enters the page itself.
 
+The same label is also available as the [JSON label app](json-label-app.html):
+instead of picking a chemical from a list, you paste a JSON string
+describing one or more labels — every field on the label (name, signal
+word, H-codes, pictograms, QR link) plus an expiration date for the sample.
+The page documents its JSON schema in plain words at the bottom, so an AI
+agent pointed at the page (for example Microsoft 365 Copilot) can generate
+the JSON for you, looking up the GHS facts from the SDS.
+
 ```bash
 # From the repo:
 python examples/ghs-samples/label_sls_qr.py
